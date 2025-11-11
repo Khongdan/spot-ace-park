@@ -10,7 +10,7 @@ const Auth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
+    phone: "",
     password: "",
     fullName: "",
   });
@@ -40,9 +40,12 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Convert phone to email format for Supabase auth
+      const email = `${formData.phone}@parking.app`;
+      
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
+          email: email,
           password: formData.password,
         });
 
@@ -50,11 +53,12 @@ const Auth = () => {
         toast.success("Đăng nhập thành công!");
       } else {
         const { error } = await supabase.auth.signUp({
-          email: formData.email,
+          email: email,
           password: formData.password,
           options: {
             data: {
               full_name: formData.fullName,
+              phone: formData.phone,
             },
             emailRedirectTo: `${window.location.origin}/`,
           },
@@ -70,82 +74,82 @@ const Auth = () => {
     }
   };
 
+  // Generate 50 animated spans
+  const spans = Array.from({ length: 50 }, (_, i) => (
+    <span key={i} style={{ "--i": i } as React.CSSProperties}></span>
+  ));
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#111] overflow-hidden">
-      <div className="relative w-[500px] h-[500px] flex items-center justify-center auth-ring">
-        <i className="auth-ring-item" style={{ "--clr": "#00ff0a" } as React.CSSProperties}></i>
-        <i className="auth-ring-item" style={{ "--clr": "#ff0057" } as React.CSSProperties}></i>
-        <i className="auth-ring-item" style={{ "--clr": "#fffd44" } as React.CSSProperties}></i>
+    <div className="min-h-screen flex items-center justify-center bg-[#1f293d] overflow-hidden">
+      <div className="auth-container">
+        {spans}
         
-        <div className="absolute w-[300px] h-full flex flex-col items-center justify-center gap-5">
-          <h2 className="text-4xl font-bold text-white">
+        <div className="auth-login-box">
+          <h1 className="text-5xl font-semibold text-[#0ef] text-center mb-8">
             {isLogin ? "Login" : "Signup"}
-          </h2>
+          </h1>
           
-          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5">
+          <form onSubmit={handleSubmit} className="w-full px-12">
             {!isLogin && (
-              <div className="relative w-full">
+              <div className="auth-input-box">
                 <input
                   type="text"
-                  placeholder="Họ và tên"
                   value={formData.fullName}
                   onChange={(e) =>
                     setFormData({ ...formData, fullName: e.target.value })
                   }
                   required
-                  className="auth-input"
                 />
+                <label>Họ và tên</label>
               </div>
             )}
             
-            <div className="relative w-full">
+            <div className="auth-input-box">
               <input
-                type="email"
-                placeholder="Email"
-                value={formData.email}
+                type="tel"
+                value={formData.phone}
                 onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
+                  setFormData({ ...formData, phone: e.target.value })
                 }
                 required
-                className="auth-input"
               />
+              <label>Số điện thoại</label>
             </div>
             
-            <div className="relative w-full">
+            <div className="auth-input-box">
               <input
                 type="password"
-                placeholder="Mật khẩu"
                 value={formData.password}
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
                 required
-                className="auth-input"
               />
+              <label>Mật khẩu</label>
             </div>
+
+            <p className="my-4 text-[#ecf0f1] text-sm text-center">
+              Quên mật khẩu?{" "}
+              <a href="#" className="no-underline text-[#78b8d7] font-bold hover:underline">
+                Nhấn vào đây
+              </a>
+            </p>
             
-            <div className="relative w-full">
-              <input
-                type="submit"
-                value={loading ? "Đang xử lý..." : isLogin ? "Sign in" : "Sign up"}
-                disabled={loading}
-                className="auth-submit"
-              />
-            </div>
-          </form>
-          
-          <div className="relative w-full flex items-center justify-between px-5">
-            <a href="#" className="text-white text-sm no-underline hover:underline">
-              Quên mật khẩu
-            </a>
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-white text-sm no-underline hover:underline bg-transparent border-none cursor-pointer"
-            >
-              {isLogin ? "Đăng ký" : "Đăng nhập"}
+            <button type="submit" className="auth-btn" disabled={loading}>
+              {loading ? "Đang xử lý..." : isLogin ? "Login" : "Signup"}
             </button>
-          </div>
+            
+            <p className="mt-4 text-[#ecf0f1] text-sm text-center">
+              {isLogin ? "Tạo tài khoản mới" : "Đã có tài khoản?"}{" "}
+              <button
+                type="button"
+                onClick={() => setIsLogin(!isLogin)}
+                className="no-underline text-[#78b8d7] font-bold hover:underline bg-transparent border-none cursor-pointer"
+              >
+                Nhấn vào đây
+              </button>
+            </p>
+          </form>
         </div>
       </div>
     </div>
