@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Session } from "@supabase/supabase-js";
 
@@ -20,7 +16,6 @@ const Auth = () => {
   });
 
   useEffect(() => {
-    // Set up auth state listener
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -30,7 +25,6 @@ const Auth = () => {
       }
     });
 
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
@@ -77,75 +71,83 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">
-            {isLogin ? "Đăng nhập" : "Đăng ký"}
-          </CardTitle>
-          <CardDescription className="text-center">
-            {isLogin
-              ? "Đăng nhập để quản lý đặt chỗ"
-              : "Tạo tài khoản mới"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#111] overflow-hidden">
+      <div className="relative w-[500px] h-[500px] flex items-center justify-center auth-ring">
+        <i className="auth-ring-item" style={{ "--clr": "#00ff0a" } as React.CSSProperties}></i>
+        <i className="auth-ring-item" style={{ "--clr": "#ff0057" } as React.CSSProperties}></i>
+        <i className="auth-ring-item" style={{ "--clr": "#fffd44" } as React.CSSProperties}></i>
+        
+        <div className="absolute w-[300px] h-full flex flex-col items-center justify-center gap-5">
+          <h2 className="text-4xl font-bold text-white">
+            {isLogin ? "Login" : "Signup"}
+          </h2>
+          
+          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5">
             {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Họ và tên</Label>
-                <Input
-                  id="fullName"
+              <div className="relative w-full">
+                <input
                   type="text"
+                  placeholder="Họ và tên"
                   value={formData.fullName}
                   onChange={(e) =>
                     setFormData({ ...formData, fullName: e.target.value })
                   }
                   required
+                  className="auth-input"
                 />
               </div>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
+            
+            <div className="relative w-full">
+              <input
                 type="email"
+                placeholder="Email"
                 value={formData.email}
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
                 required
+                className="auth-input"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Mật khẩu</Label>
-              <Input
-                id="password"
+            
+            <div className="relative w-full">
+              <input
                 type="password"
+                placeholder="Mật khẩu"
                 value={formData.password}
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
                 required
+                className="auth-input"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Đang xử lý..." : isLogin ? "Đăng nhập" : "Đăng ký"}
-            </Button>
+            
+            <div className="relative w-full">
+              <input
+                type="submit"
+                value={loading ? "Đang xử lý..." : isLogin ? "Sign in" : "Sign up"}
+                disabled={loading}
+                className="auth-submit"
+              />
+            </div>
           </form>
-          <div className="mt-4 text-center">
+          
+          <div className="relative w-full flex items-center justify-between px-5">
+            <a href="#" className="text-white text-sm no-underline hover:underline">
+              Quên mật khẩu
+            </a>
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-primary hover:underline"
+              className="text-white text-sm no-underline hover:underline bg-transparent border-none cursor-pointer"
             >
-              {isLogin
-                ? "Chưa có tài khoản? Đăng ký"
-                : "Đã có tài khoản? Đăng nhập"}
+              {isLogin ? "Đăng ký" : "Đăng nhập"}
             </button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

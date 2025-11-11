@@ -145,3 +145,95 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Auth page animated ring styles */
+.auth-ring {
+  position: relative;
+}
+
+.auth-ring-item {
+  position: absolute;
+  inset: 0;
+  border: 2px solid #fff;
+  transition: 0.5s;
+}
+
+.auth-ring-item:nth-child(1) {
+  border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%;
+  animation: auth-rotate 6s linear infinite;
+}
+
+.auth-ring-item:nth-child(2) {
+  border-radius: 41% 44% 56% 59% / 38% 62% 63% 37%;
+  animation: auth-rotate 4s linear infinite;
+}
+
+.auth-ring-item:nth-child(3) {
+  border-radius: 41% 44% 56% 59% / 38% 62% 63% 37%;
+  animation: auth-rotate-reverse 10s linear infinite;
+}
+
+.auth-ring:hover .auth-ring-item {
+  border-width: 6px;
+  border-color: var(--clr);
+  filter: drop-shadow(0 0 20px var(--clr));
+}
+
+@keyframes auth-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes auth-rotate-reverse {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.auth-input {
+  position: relative;
+  width: 100%;
+  padding: 12px 20px;
+  background: transparent;
+  border: 2px solid #fff;
+  border-radius: 40px;
+  font-size: 1.2em;
+  color: #fff;
+  outline: none;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.auth-input::placeholder {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.auth-submit {
+  position: relative;
+  width: 100%;
+  padding: 12px 20px;
+  background: linear-gradient(45deg, #ff357a, #fff172);
+  border: none;
+  border-radius: 40px;
+  font-size: 1.2em;
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+  font-family: 'Quicksand', sans-serif;
+  transition: opacity 0.3s;
+}
+
+.auth-submit:hover {
+  opacity: 0.9;
+}
+
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
