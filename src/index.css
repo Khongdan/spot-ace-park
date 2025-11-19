@@ -196,7 +196,8 @@ All colors MUST be HSL.
   -webkit-text-fill-color: transparent;
   background-clip: text;
   filter: drop-shadow(0 0 8px hsl(217 91% 60% / 0.5));
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+  padding-bottom: 1rem;
 }
 
 .auth-input-box {
