@@ -21,19 +21,36 @@ const Auth = () => {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) {
-        navigate("/");
+        // Check user role and redirect accordingly
+        setTimeout(() => {
+          checkUserRoleAndRedirect(session.user.id);
+        }, 0);
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
-        navigate("/");
+        checkUserRoleAndRedirect(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const checkUserRoleAndRedirect = async (userId: string) => {
+    const { data } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .single();
+    
+    if (data?.role === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,13 +61,25 @@ const Auth = () => {
       const email = `${formData.phone}@parking.app`;
       
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: email,
           password: formData.password,
         });
 
         if (error) throw error;
-        toast.success("Đăng nhập thành công!");
+        
+        // Check role and show appropriate message
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .single();
+        
+        if (roleData?.role === 'admin') {
+          toast.success("Đăng nhập Admin thành công!");
+        } else {
+          toast.success("Đăng nhập thành công!");
+        }
       } else {
         const { error } = await supabase.auth.signUp({
           email: email,
