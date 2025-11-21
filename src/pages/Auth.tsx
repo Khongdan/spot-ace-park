@@ -6,7 +6,6 @@ import { Session } from "@supabase/supabase-js";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const [isActive, setIsActive] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
   const [loginData, setLoginData] = useState({
@@ -18,6 +17,28 @@ const Auth = () => {
     password: "",
     fullName: "",
   });
+
+  useEffect(() => {
+    const container = document.getElementById('container');
+    const registerBtn = document.getElementById('register');
+    const loginBtn = document.getElementById('login');
+
+    const handleRegisterClick = () => {
+      container?.classList.add('active');
+    };
+
+    const handleLoginClick = () => {
+      container?.classList.remove('active');
+    };
+
+    registerBtn?.addEventListener('click', handleRegisterClick);
+    loginBtn?.addEventListener('click', handleLoginClick);
+
+    return () => {
+      registerBtn?.removeEventListener('click', handleRegisterClick);
+      loginBtn?.removeEventListener('click', handleLoginClick);
+    };
+  }, []);
 
   useEffect(() => {
     const {
@@ -116,103 +137,96 @@ const Auth = () => {
   };
 
   return (
-    <div className="auth-new-container min-h-screen flex items-center justify-center">
-      <div className={`auth-new-wrapper ${isActive ? 'active' : ''}`}>
-        {/* Sign In Form */}
-        <div className="form-container sign-in">
-          <form onSubmit={handleLogin}>
-            <h1>Đăng Nhập</h1>
-            <div className="social-icons">
-              <a href="#" className="icon"><i className="fa-brands fa-google-plus-g"></i></a>
-              <a href="#" className="icon"><i className="fa-brands fa-facebook-f"></i></a>
-              <a href="#" className="icon"><i className="fa-brands fa-github"></i></a>
-              <a href="#" className="icon"><i className="fa-brands fa-linkedin-in"></i></a>
-            </div>
-            <span>hoặc sử dụng số điện thoại của bạn</span>
-            <input
-              type="tel"
-              placeholder="Số điện thoại"
-              value={loginData.phone}
-              onChange={(e) => setLoginData({ ...loginData, phone: e.target.value })}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Mật khẩu"
-              value={loginData.password}
-              onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-              required
-            />
-            <a href="#">Quên mật khẩu?</a>
-            <button type="submit" disabled={loading}>
-              {loading ? "Đang xử lý..." : "Đăng Nhập"}
+    <div className="container" id="container">
+      <div className="form-container sign-up">
+        <form onSubmit={handleSignup}>
+          <h1>Tạo Tài Khoản</h1>
+          <div className="social-icons">
+            <a href="#" className="icon"><i className="fa-brands fa-google-plus-g"></i></a>
+            <a href="#" className="icon"><i className="fa-brands fa-facebook-f"></i></a>
+            <a href="#" className="icon"><i className="fa-brands fa-github"></i></a>
+            <a href="#" className="icon"><i className="fa-brands fa-linkedin-in"></i></a>
+          </div>
+          <span>hoặc sử dụng số điện thoại để đăng ký</span>
+          <input
+            type="text"
+            placeholder="Họ và tên"
+            value={signupData.fullName}
+            onChange={(e) => setSignupData({ ...signupData, fullName: e.target.value })}
+            required
+          />
+          <input
+            type="tel"
+            placeholder="Số điện thoại"
+            value={signupData.phone}
+            onChange={(e) => setSignupData({ ...signupData, phone: e.target.value })}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Mật khẩu"
+            value={signupData.password}
+            onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+            required
+          />
+          <button type="submit" disabled={loading}>
+            {loading ? "Đang xử lý..." : "Đăng Ký"}
+          </button>
+        </form>
+      </div>
+      <div className="form-container sign-in">
+        <form onSubmit={handleLogin}>
+          <h1>Đăng Nhập</h1>
+          <div className="social-icons">
+            <a href="#" className="icon"><i className="fa-brands fa-google-plus-g"></i></a>
+            <a href="#" className="icon"><i className="fa-brands fa-facebook-f"></i></a>
+            <a href="#" className="icon"><i className="fa-brands fa-github"></i></a>
+            <a href="#" className="icon"><i className="fa-brands fa-linkedin-in"></i></a>
+          </div>
+          <span>hoặc sử dụng số điện thoại của bạn</span>
+          <input
+            type="tel"
+            placeholder="Số điện thoại"
+            value={loginData.phone}
+            onChange={(e) => setLoginData({ ...loginData, phone: e.target.value })}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Mật khẩu"
+            value={loginData.password}
+            onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+            required
+          />
+          <a href="#">Quên mật khẩu?</a>
+          <button type="submit" disabled={loading}>
+            {loading ? "Đang xử lý..." : "Đăng Nhập"}
+          </button>
+        </form>
+      </div>
+      <div className="toggle-container">
+        <div className="toggle">
+          <div className="toggle-panel toggle-left">
+            <h1>Chào Mừng Trở Lại!</h1>
+            <p>Nhập thông tin cá nhân của bạn để sử dụng tất cả các tính năng của trang web</p>
+            <button
+              type="button"
+              className="hidden"
+              id="login"
+            >
+              Đăng Nhập
             </button>
-          </form>
-        </div>
-
-        {/* Sign Up Form */}
-        <div className="form-container sign-up">
-          <form onSubmit={handleSignup}>
-            <h1>Tạo Tài Khoản</h1>
-            <div className="social-icons">
-              <a href="#" className="icon"><i className="fa-brands fa-google-plus-g"></i></a>
-              <a href="#" className="icon"><i className="fa-brands fa-facebook-f"></i></a>
-              <a href="#" className="icon"><i className="fa-brands fa-github"></i></a>
-              <a href="#" className="icon"><i className="fa-brands fa-linkedin-in"></i></a>
-            </div>
-            <span>hoặc sử dụng số điện thoại để đăng ký</span>
-            <input
-              type="text"
-              placeholder="Họ và tên"
-              value={signupData.fullName}
-              onChange={(e) => setSignupData({ ...signupData, fullName: e.target.value })}
-              required
-            />
-            <input
-              type="tel"
-              placeholder="Số điện thoại"
-              value={signupData.phone}
-              onChange={(e) => setSignupData({ ...signupData, phone: e.target.value })}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Mật khẩu"
-              value={signupData.password}
-              onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-              required
-            />
-            <button type="submit" disabled={loading}>
-              {loading ? "Đang xử lý..." : "Đăng Ký"}
+          </div>
+          <div className="toggle-panel toggle-right">
+            <h1>Xin Chào, Bạn!</h1>
+            <p>Đăng ký với thông tin cá nhân của bạn để sử dụng tất cả các tính năng của trang web</p>
+            <button
+              type="button"
+              className="hidden"
+              id="register"
+            >
+              Đăng Ký
             </button>
-          </form>
-        </div>
-
-        {/* Toggle Container */}
-        <div className="toggle-container">
-          <div className="toggle">
-            <div className="toggle-panel toggle-left">
-              <h1>Chào Mừng Trở Lại!</h1>
-              <p>Nhập thông tin cá nhân của bạn để sử dụng tất cả các tính năng của trang web</p>
-              <button
-                type="button"
-                className="hidden"
-                onClick={() => setIsActive(false)}
-              >
-                Đăng Nhập
-              </button>
-            </div>
-            <div className="toggle-panel toggle-right">
-              <h1>Xin Chào, Bạn!</h1>
-              <p>Đăng ký với thông tin cá nhân của bạn để sử dụng tất cả các tính năng của trang web</p>
-              <button
-                type="button"
-                className="hidden"
-                onClick={() => setIsActive(true)}
-              >
-                Đăng Ký
-              </button>
-            </div>
           </div>
         </div>
       </div>
