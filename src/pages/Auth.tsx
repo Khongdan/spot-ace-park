@@ -6,10 +6,14 @@ import { Session } from "@supabase/supabase-js";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
+  const [isActive, setIsActive] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [loginData, setLoginData] = useState({
+    phone: "",
+    password: "",
+  });
+  const [signupData, setSignupData] = useState({
     phone: "",
     password: "",
     fullName: "",
@@ -21,7 +25,6 @@ const Auth = () => {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) {
-        // Check user role and redirect accordingly
         setTimeout(() => {
           checkUserRoleAndRedirect(session.user.id);
         }, 0);
@@ -52,49 +55,30 @@ const Auth = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Convert phone to email format for Supabase auth
-      const email = `${formData.phone}@parking.app`;
+      const email = `${loginData.phone}@parking.app`;
       
-      if (isLogin) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: email,
-          password: formData.password,
-        });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: loginData.password,
+      });
 
-        if (error) throw error;
-        
-        // Check role and show appropriate message
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', data.user.id)
-          .single();
-        
-        if (roleData?.role === 'admin') {
-          toast.success("Đăng nhập Admin thành công!");
-        } else {
-          toast.success("Đăng nhập thành công!");
-        }
+      if (error) throw error;
+      
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', data.user.id)
+        .single();
+      
+      if (roleData?.role === 'admin') {
+        toast.success("Đăng nhập Admin thành công!");
       } else {
-        const { error } = await supabase.auth.signUp({
-          email: email,
-          password: formData.password,
-          options: {
-            data: {
-              full_name: formData.fullName,
-              phone: formData.phone,
-            },
-            emailRedirectTo: `${window.location.origin}/`,
-          },
-        });
-
-        if (error) throw error;
-        toast.success("Đăng ký thành công!");
+        toast.success("Đăng nhập thành công!");
       }
     } catch (error: any) {
       toast.error(error.message || "Có lỗi xảy ra");
@@ -103,82 +87,133 @@ const Auth = () => {
     }
   };
 
-  // Generate 50 animated spans
-  const spans = Array.from({ length: 50 }, (_, i) => (
-    <span key={i} style={{ "--i": i } as React.CSSProperties}></span>
-  ));
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const email = `${signupData.phone}@parking.app`;
+      
+      const { error } = await supabase.auth.signUp({
+        email: email,
+        password: signupData.password,
+        options: {
+          data: {
+            full_name: signupData.fullName,
+            phone: signupData.phone,
+          },
+          emailRedirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (error) throw error;
+      toast.success("Đăng ký thành công!");
+    } catch (error: any) {
+      toast.error(error.message || "Có lỗi xảy ra");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#1f293d] overflow-hidden">
-      <div className="auth-container">
-        {spans}
-        
-        <div className="auth-login-box">
-          <h1 className="text-5xl font-semibold text-[#0ef] text-center mb-8">
-            {isLogin ? "Login" : "Signup"}
-          </h1>
-          
-          <form onSubmit={handleSubmit} className="w-full px-12">
-            {!isLogin && (
-              <div className="auth-input-box">
-                <input
-                  type="text"
-                  value={formData.fullName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fullName: e.target.value })
-                  }
-                  required
-                />
-                <label>Họ và tên</label>
-              </div>
-            )}
-            
-            <div className="auth-input-box">
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                required
-              />
-              <label>Số điện thoại</label>
+    <div className="auth-new-container min-h-screen flex items-center justify-center">
+      <div className={`auth-new-wrapper ${isActive ? 'active' : ''}`}>
+        {/* Sign In Form */}
+        <div className="form-container sign-in">
+          <form onSubmit={handleLogin}>
+            <h1>Đăng Nhập</h1>
+            <div className="social-icons">
+              <a href="#" className="icon"><i className="fa-brands fa-google-plus-g"></i></a>
+              <a href="#" className="icon"><i className="fa-brands fa-facebook-f"></i></a>
+              <a href="#" className="icon"><i className="fa-brands fa-github"></i></a>
+              <a href="#" className="icon"><i className="fa-brands fa-linkedin-in"></i></a>
             </div>
-            
-            <div className="auth-input-box">
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                required
-              />
-              <label>Mật khẩu</label>
-            </div>
-
-            <p className="my-4 text-[#ecf0f1] text-sm text-center">
-              Quên mật khẩu?{" "}
-              <a href="#" className="no-underline text-[#78b8d7] font-bold hover:underline">
-                Nhấn vào đây
-              </a>
-            </p>
-            
-            <button type="submit" className="auth-btn" disabled={loading}>
-              {loading ? "Đang xử lý..." : isLogin ? "Login" : "Signup"}
+            <span>hoặc sử dụng số điện thoại của bạn</span>
+            <input
+              type="tel"
+              placeholder="Số điện thoại"
+              value={loginData.phone}
+              onChange={(e) => setLoginData({ ...loginData, phone: e.target.value })}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Mật khẩu"
+              value={loginData.password}
+              onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+              required
+            />
+            <a href="#">Quên mật khẩu?</a>
+            <button type="submit" disabled={loading}>
+              {loading ? "Đang xử lý..." : "Đăng Nhập"}
             </button>
-            
-            <p className="mt-4 text-[#ecf0f1] text-sm text-center">
-              {isLogin ? "Tạo tài khoản mới" : "Đã có tài khoản?"}{" "}
+          </form>
+        </div>
+
+        {/* Sign Up Form */}
+        <div className="form-container sign-up">
+          <form onSubmit={handleSignup}>
+            <h1>Tạo Tài Khoản</h1>
+            <div className="social-icons">
+              <a href="#" className="icon"><i className="fa-brands fa-google-plus-g"></i></a>
+              <a href="#" className="icon"><i className="fa-brands fa-facebook-f"></i></a>
+              <a href="#" className="icon"><i className="fa-brands fa-github"></i></a>
+              <a href="#" className="icon"><i className="fa-brands fa-linkedin-in"></i></a>
+            </div>
+            <span>hoặc sử dụng số điện thoại để đăng ký</span>
+            <input
+              type="text"
+              placeholder="Họ và tên"
+              value={signupData.fullName}
+              onChange={(e) => setSignupData({ ...signupData, fullName: e.target.value })}
+              required
+            />
+            <input
+              type="tel"
+              placeholder="Số điện thoại"
+              value={signupData.phone}
+              onChange={(e) => setSignupData({ ...signupData, phone: e.target.value })}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Mật khẩu"
+              value={signupData.password}
+              onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+              required
+            />
+            <button type="submit" disabled={loading}>
+              {loading ? "Đang xử lý..." : "Đăng Ký"}
+            </button>
+          </form>
+        </div>
+
+        {/* Toggle Container */}
+        <div className="toggle-container">
+          <div className="toggle">
+            <div className="toggle-panel toggle-left">
+              <h1>Chào Mừng Trở Lại!</h1>
+              <p>Nhập thông tin cá nhân của bạn để sử dụng tất cả các tính năng của trang web</p>
               <button
                 type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="no-underline text-[#78b8d7] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                className="hidden"
+                onClick={() => setIsActive(false)}
               >
-                Nhấn vào đây
+                Đăng Nhập
               </button>
-            </p>
-          </form>
+            </div>
+            <div className="toggle-panel toggle-right">
+              <h1>Xin Chào, Bạn!</h1>
+              <p>Đăng ký với thông tin cá nhân của bạn để sử dụng tất cả các tính năng của trang web</p>
+              <button
+                type="button"
+                className="hidden"
+                onClick={() => setIsActive(true)}
+              >
+                Đăng Ký
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
